@@ -1,0 +1,4 @@
+.deploy_configuration.ini
+.deploy_configuration.php
+.deploy_configuration.sh
+vendor

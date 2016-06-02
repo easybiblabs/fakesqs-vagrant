@@ -1,0 +1,58 @@
+{
+  "deploy": {
+    "deploy_to": "/var/www/fakesqs"
+  },
+  "php": {
+    "ppa": {
+      "name": "ondrejphp",
+      "uri": "ppa:ondrej/php",
+      "package_prefix": "php5.6"
+    }
+  },
+  "php-apc": {
+    "package_prefix": "php5.6"
+  },
+  "php-fpm": {
+    "prefix": "",
+    "exec_prefix": "/usr",
+    "fpm_config": "etc/php/5.6/fpm/php.ini",
+    "cli_config": "etc/php/5.6/cli/php.ini",
+    "pool_dir": "etc/php/5.6/fpm/pool.d",
+    "socketdir": "/var/run/php",
+    "pid": "/var/run/php/php5.6-fpm.pid",
+    "packages": "php5.6-fpm,php5.6-cli,php5.6-xml",
+    "user": "vagrant",
+    "group": "vagrant"
+  },
+  "composer": {
+    "environment": {
+      "user": "vagrant",
+      "group": "vagrant"
+    }
+  },
+  "nginx-app": {
+    "access_log": "/var/log/nginx/access.log",
+    "conf_file": "silex.conf.erb",
+    "extras": "sendfile off;",
+    "group": "www-data",
+    "user": "www-data",
+    "fastcgi_read_timeout": 30,
+    "ppa": "ppa:nginx/stable",
+    "browser_caching": {
+        "enabled": true
+    },
+    "gzip": {
+        "enabled": true
+    }
+  },
+  "vagrant": {
+    "applications": {
+      "fakesqspoc": {
+        "app_root_location": "/vagrant_www",
+        "doc_root_location": "/vagrant_www",
+        "default_router": "index.php",
+        "domain_name": "fakesqs.bib"
+      }
+    }
+  }
+}
