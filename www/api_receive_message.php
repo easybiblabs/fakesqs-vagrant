@@ -6,8 +6,6 @@
 
     if(isset($_GET['queue_name'])) {
 
-        # Create Queue
-        # 
         # http://docs.aws.amazon.com/aws-sdk-php/v3/api/api-sqs-2012-11-05.html#receivemessage
         # http://docs.aws.amazon.com/aws-sdk-php/v3/api/api-sqs-2012-11-05.html#getqueueurl
 
@@ -35,7 +33,9 @@
         $request_options = array( 
             'QueueUrl' => $queue_url
             );
-        
+        // LONG POLLING can be used here with the parameter "WaitTimeSeconds"
+        // with a maximum wait time of 20 seconds.
+
         // purge the queue
         $result = $sqs_client->receiveMessage($request_options);
 

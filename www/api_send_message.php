@@ -6,8 +6,6 @@
 
     if(isset($_GET['queue_name']) && isset($_GET['body'])) {
 
-        # Create Queue
-        # 
         # http://docs.aws.amazon.com/aws-sdk-php/v3/api/api-sqs-2012-11-05.html#sendmessage
         # http://docs.aws.amazon.com/aws-sdk-php/v3/api/api-sqs-2012-11-05.html#getqueueurl
 
