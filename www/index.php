@@ -137,6 +137,17 @@ input {
     </head>
     <body>
         <div class="queue_box">
+            <div class="box" id="instructions">
+                <h1> instructions </h1>
+                <ol>
+                    <li>type a queue name into the create queue field then click "create queue"</li>
+                    <li>type "first" into the message box next to your queue in the queue list then click "send"</li>
+                    <li>type "second" into the message box next to your queue in the queue list then click "send"</li>
+                    <li>type "third" into the message box next to your queue in the queue list then click "send"</li>
+                    <li>click "read a msg" to read a message from the queue a few times</li>
+                    <li><strong>explore</strong></li>
+                </ol>
+            </div>
             <div class="box" id="queue">
                 <h1> create queue </h1>
                 <div id="create_queue_form">
