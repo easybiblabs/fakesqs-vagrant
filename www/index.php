@@ -27,6 +27,35 @@ ul {
     list-style: none;
 }
 
+input {
+    font-size: 13px;
+    height: 21px;
+    padding: 0 4px;
+    margin: 0 8px 0 0;
+}
+
+#message_list li {
+    padding: 8px;
+    border: 1px dotted grey;
+    margin: 2px 0px;
+}
+
+#message_list .new_message {
+    background-color: #FEFFD5;
+}
+
+.message_body {
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+.message_source {
+    font-style: oblique;
+    font-weight: 600;
+    font-size: smaller;
+    color: #888888;
+}
+
 #queue_list li { 
     display: block;
     margin: 0;
@@ -39,10 +68,17 @@ ul {
 #queue_list li strong {
     border: 1px solid #F3E1FF;
     background: #FBF5FF;
-    width: 300px;
+    width: 230px;
     display: inline-block;
     padding: 0 4px;
+    margin-right: 8px;  
 }
+
+.queue_box {
+    width: 800px;
+    margin: auto;
+}
+
 .box {
     border: 1px solid blue;
     padding: 8px;
@@ -78,7 +114,7 @@ ul {
     padding:4px 8px;
     text-decoration:none;
     text-shadow:0px 1px 0px #9752cc;
-    margin: 0px 8px;
+    margin: 0px 8px 0px 0px;
 }
 
 .button:hover {
@@ -100,38 +136,50 @@ ul {
 </style>
     </head>
     <body>
-        <div class="box" id="queue">
-            <h1> create queue </h1>
-            <div id="create_queue_form">
-                <input type="text" name="new_queue_name" id="new_queue_name" placeholder="queue name"/>
-                <a class="button" onclick="do_create_queue();">create queue</a>
-                <a class="button" onclick="get_queues();">list all queues</a>
-                <a class="button" onclick="purge_fakesqs();">PURGE FAKESQS</a>
+        <div class="queue_box">
+            <div class="box" id="queue">
+                <h1> create queue </h1>
+                <div id="create_queue_form">
+                    <input type="text" name="new_queue_name" id="new_queue_name" placeholder="queue name"/>
+                    <a class="button" onclick="do_create_queue();">create queue</a>
+                    <a class="button" onclick="get_queues();">list all queues</a>
+                    <a class="button" onclick="purge_fakesqs();">PURGE FAKESQS</a>
+                </div>
             </div>
-        </div>
-        <div class="box" id="container_queue_list">
-            <h1> queue list </h1>
-            <ul id="queue_list">
-            </ul>
+            <div class="box" id="container_queue_list">
+                <h1> queue list </h1>
+                <ul id="queue_list">
+                </ul>
+            </div>
+            <div class="box" id="message_results_box">
+                <h1> messages <span id="messages_received"></span></h1>
+                <ul id="message_list">
+                </ul>
+            </div>
         </div>
     </body>
 <script>
     function get_queues() {
+        // request the list of queues from this machine
         $('#queue_list').empty();
         var queues = $.getJSON( "api_list_queues.php", function(data) {
             $.each(data['QueueUrls'], function( index, value ) {
+                // process the queue list if any
                 queue_name = basename(value);
+                queue_name_id = queue_name.replace(/\s+/g, '_');
                 $('#queue_list').append(
                     $('<li>').append(
                         $('<strong>').text(queue_name)
                     ).append(
-                        $('<button>').attr('class', 'button purge').data('queue_name',queue_name).append('purge').click(function(){do_purge_queue($(this))})
+                        $('<button>').attr('class', 'button delete').data('queue_name',queue_name).append('delete queue').click(function(){do_delete_queue($(this))})
                     ).append(
-                        $('<button>').attr('class', 'button delete').data('queue_name',queue_name).append('delete').click(function(){do_delete_queue($(this))})
+                        $('<button>').attr('class', 'button purge').data('queue_name',queue_name).append('purge msgs').click(function(){do_purge_queue($(this))})
                     ).append(
-                        $('<input>').attr('id', queue_name + '_new_message').attr('placeholder', 'message to send').data('queue_name',queue_name)
+                        $('<button>').attr('class', 'button read').data('queue_name',queue_name).append('read a msg').click(function(){do_read_message($(this))})
                     ).append(
-                        $('<button>').attr('class', 'button send').data('queue_name',queue_name).append('send msg').click(function(){do_send_message($(this))})
+                        $('<input>').attr('id', queue_name_id + '_new_message').attr('placeholder', 'message to send').data('queue_name',queue_name)
+                    ).append(
+                        $('<button>').attr('class', 'button send').data('queue_name',queue_name).append('send').click(function(){do_send_message($(this))})
                     )
                 );
             });
@@ -139,28 +187,100 @@ ul {
     }
 
     function do_purge_queue(object) {
+        // purge a named queue
         queue_name = object.data('queue_name');
         $.getJSON( "api_purge_queue.php?queue_name=" + queue_name, function(data) { get_queues(); });
     }
 
     function do_delete_queue(object) {
+        // delete a named queue
         queue_name = object.data('queue_name');
         $.getJSON( "api_delete_queue.php?queue_name=" + queue_name, function(data) { get_queues(); });
     }
 
     function do_create_queue() {
-        queue_name = $("#new_queue_name").val();
+        // create a new named queue
+        queue_name = $("#new_queue_name").val().toLowerCase().replace(/\s+/g, '_');
         if(queue_name != '' ) $.getJSON( "api_create_queue.php?queue_name=" + queue_name, function(data) { get_queues(); });
     }
 
     function do_send_message(object) {
+        // send a message to a named queue
         queue_name = object.data('queue_name');
+        queue_name_id = queue_name.replace(/\s+/g, '_');
         if(queue_name != '' ) {
-            message_content = encodeURI($("#"+queue_name+"_new_message").val());
+            message_content = encodeURI($("#"+queue_name_id+"_new_message").val());
             if(message_content != '' ) {
                 $.getJSON( "api_send_message.php?queue_name=" + queue_name +"&body=" + message_content, function(data) { get_queues(); });
             }
         }
+    }
+
+    function do_read_message(object) {
+        // read a message from a named queue
+        queue_name = object.data('queue_name');
+        if(queue_name != '' ) {
+            $.getJSON( "api_receive_message.php?queue_name=" + queue_name, function(data) { 
+                count = 0;
+                $('#message_list .new_message').removeClass('new_message');
+                $.each(data['Messages'], function( index, value ) {
+                    count++;
+                    msg_id = value['MessageId'];
+                    msg_handle = value['ReceiptHandle'];
+                    msg_md5 = value['MD5OfBody'];
+                    msg_body = value['Body'];
+                    if ( ! $('#' + msg_handle).length ) {
+                        $('#message_list').prepend(
+                            $('<li>').attr('class', 'new_message').attr('id', msg_handle)
+                            .append(
+                                $('<span>').attr('class','message_source').text(queue_name)
+                            ).append(
+                                $('<br>')
+                            ).append(
+                                $('<strong>').text(msg_handle)
+                            ).append(
+                                $('<br>')
+                            ).append(
+                                $('<strong>').text(msg_id)
+                            ).append(
+                                $('<br>')
+                            ).append(
+                                $('<span>').attr('class','message_body').text(msg_body)
+                            ).append(
+                                $('<br>')
+                            ).append(
+                                $('<button>').attr('class', 'button delete').data('queue_name',queue_name).data('message_handle',msg_handle).append('delete').click(function(){do_delete_message($(this))})
+                            ).append(
+                                $('<button>').attr('class', 'button purge').data('queue_name',queue_name).data('message_handle',msg_handle).append('change visibility timeout').click(function(){do_change_visibility_timeout($(this))})
+                            )
+                        );
+                    } else {
+                        $('#' + msg_handle).addClass('new_message').parent().prepend($('#' + msg_handle));
+                    }
+                });
+                $('#messages_received').text(count + ' received');
+            });
+        }
+    }
+
+    function do_delete_message(object) {
+        // delete a message by ID
+        msg_handle = object.data('message_handle');
+        queue_name = object.data('queue_name');
+        $.getJSON( "api_delete_message.php?queue_name=" + queue_name + "&message_handle=" + msg_handle, function(data) { 
+            $('#message_list .new_message').removeClass('new_message');
+            $('#' + msg_handle).remove() 
+        });
+    }
+
+    function do_change_visibility_timeout(object) {
+        // change a message timeout
+        msg_handle = object.data('message_handle');
+        queue_name = object.data('queue_name');
+        $.getJSON( "api_visibility_timeout.php?queue_name=" + queue_name + "&message_handle=" + msg_handle, function(data) { 
+            $('#message_list .new_message').removeClass('new_message');
+            $('#' + msg_handle).addClass('new_message').parent().prepend($('#' + msg_handle)) 
+        });
     }
 
     function purge_fakesqs(object) {
