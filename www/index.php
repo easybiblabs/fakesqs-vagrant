@@ -27,13 +27,22 @@ ul {
     list-style: none;
 }
 
-li { 
+#queue_list li { 
     display: block;
     margin: 0;
     padding: 4px 0px 2px;
     text-decoration: none;
+    border-bottom: 1px solid #FBF5FF;
+    padding-bottom: 4px;
 }
 
+#queue_list li strong {
+    border: 1px solid #F3E1FF;
+    background: #FBF5FF;
+    width: 300px;
+    display: inline-block;
+    padding: 0 4px;
+}
 .box {
     border: 1px solid blue;
     padding: 8px;
@@ -93,10 +102,12 @@ li {
     <body>
         <div class="box" id="queue">
             <h1> create queue </h1>
-            <form id="create_queue_form">
+            <div id="create_queue_form">
                 <input type="text" name="new_queue_name" id="new_queue_name" placeholder="queue name"/>
                 <a class="button" onclick="do_create_queue();">create queue</a>
-            </form>
+                <a class="button" onclick="get_queues();">list all queues</a>
+                <a class="button" onclick="purge_fakesqs();">PURGE FAKESQS</a>
+            </div>
         </div>
         <div class="box" id="container_queue_list">
             <h1> queue list </h1>
@@ -139,15 +150,22 @@ li {
 
     function do_create_queue() {
         queue_name = $("#new_queue_name").val();
-        $.getJSON( "api_create_queue.php?queue_name=" + queue_name, function(data) { get_queues(); });
+        if(queue_name != '' ) $.getJSON( "api_create_queue.php?queue_name=" + queue_name, function(data) { get_queues(); });
     }
 
     function do_send_message(object) {
         queue_name = object.data('queue_name');
-        message_content = encodeURI($("#"+queue_name+"_new_message").val());
-        $.getJSON( "api_send_message.php?queue_name=" + queue_name +"&body=" + message_content, function(data) { get_queues(); });
+        if(queue_name != '' ) {
+            message_content = encodeURI($("#"+queue_name+"_new_message").val());
+            if(message_content != '' ) {
+                $.getJSON( "api_send_message.php?queue_name=" + queue_name +"&body=" + message_content, function(data) { get_queues(); });
+            }
+        }
     }
 
+    function purge_fakesqs(object) {
+        $.getJSON( "api_purge_fakesqs.php", function(data) { get_queues(); });
+    }
 
     function basename(path) {
         return path.split('/').reverse()[0];
