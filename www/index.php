@@ -232,6 +232,9 @@ input {
                     if ( ! $('#' + msg_id).length ) {
                         $('#message_list').prepend(
                             $('<li>').attr('class', 'new_message').attr('id', msg_id)
+                            .data('queue_name',queue_name)
+                            .data('message_handle',msg_handle)
+                            .data('message_id',msg_id)
                             .append(
                                 $('<span>').attr('class','message_source').text(queue_name)
                             ).append(
@@ -246,20 +249,18 @@ input {
                                 $('<br>')
                             ).append(
                                 $('<button>').attr('class', 'button delete')
-                                    .data('queue_name',queue_name)
-                                    .data('message_handle',msg_handle)
-                                    .data('message_id',msg_id)
                                     .append('delete').click(function(){do_delete_message($(this))})
                             ).append(
                                 $('<button>').attr('class', 'button purge')
-                                .data('queue_name',queue_name)
-                                .data('message_handle',msg_handle)
-                                .data('message_id',msg_id)
                                 .append('change visibility timeout').click(function(){do_change_visibility_timeout($(this))})
                             )
                         );
                     } else {
-                        $('#' + msg_id).addClass('new_message').parent().prepend($('#' + msg_id));
+                        $('#' + msg_id)
+                            .data('queue_name',queue_name)
+                            .data('message_handle',msg_handle)
+                            .data('message_id',msg_id)
+                            .addClass('new_message').parent().prepend($('#' + msg_id));
                     }
                 });
                 $('#messages_received').text(count + ' received');
@@ -269,9 +270,9 @@ input {
 
     function do_delete_message(object) {
         // delete a message by ID
-        msg_handle = object.data('message_handle');
-        msg_id = object.data('message_id');
-        queue_name = object.data('queue_name');
+        msg_handle = object.parent().data('message_handle');
+        msg_id = object.parent().data('message_id');
+        queue_name = object.parent().data('queue_name');
         $.getJSON( "api_delete_message.php?queue_name=" + queue_name + "&message_handle=" + msg_handle, function(data) { 
             $('#message_list .new_message').removeClass('new_message');
             $('#' + msg_id).remove() 
@@ -280,9 +281,9 @@ input {
 
     function do_change_visibility_timeout(object) {
         // change a message timeout
-        msg_handle = object.data('message_handle');
-        msg_id = object.data('message_id');
-        queue_name = object.data('queue_name');
+        msg_handle = object.parent().data('message_handle');
+        msg_id = object.parent().data('message_id');
+        queue_name = object.parent().data('queue_name');
         $.getJSON( "api_visibility_timeout.php?queue_name=" + queue_name + "&message_handle=" + msg_handle, function(data) { 
             $('#message_list .new_message').removeClass('new_message');
             $('#' + msg_id).addClass('new_message').parent().prepend($('#' + msg_id)) 
