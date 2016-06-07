@@ -60,6 +60,9 @@ Vagrant.configure('2') do |config|
 
     Bib::Vagrant.init_github_hostkey(web_config)
     Bib::Vagrant.check_gatling if vagrantconfig['rsync']
+
+    web_config.vm.provision "shell", inline: "cd /vagarant_www && php ./composer.phar install"
+
   end
 end
 
