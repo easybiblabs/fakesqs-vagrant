@@ -35,6 +35,9 @@
         // get the queue_url
         $queue_url = $result['QueueUrl'];
 
+        $date = date('m/d/Y h:i:s a', time());
+        $message_body = '('.$date.') '.$message_body;
+
         // set up request options
         $request_options = array( 
             'DelaySeconds' => $delay_seconds,

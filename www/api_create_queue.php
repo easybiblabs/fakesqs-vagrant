@@ -14,10 +14,10 @@
         $queue_name = $_GET['queue_name'];
 
         if(isset($_GET['delay_seconds'])) $delay_seconds = intval($_GET['delay_seconds']);
-        else $delay_seconds = 60;
+        else $delay_seconds = 0;
 
         if(isset($_GET['visibility_timeout'])) $visibility_timeout = intval($_GET['visibility_timeout']);
-        else $visibility_timeout = 60;
+        else $visibility_timeout = 30;
 
         // set up credentials from config
         $sqs_credentials = unserialize(AWS_CREDENTIALS);

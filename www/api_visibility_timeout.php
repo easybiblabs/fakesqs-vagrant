@@ -14,6 +14,8 @@
         # parse out the GETs
         $queue_name = $_GET['queue_name'];
         $message_handle = $_GET['message_handle'];
+        if(isset($_GET['visibility_timeout'])) $visibility_timeout = intval($_GET['visibility_timeout']);
+        else $visibility_timeout = 30;
 
         // set up credentials from config
         $sqs_credentials = unserialize(AWS_CREDENTIALS);
@@ -36,7 +38,7 @@
         $request_options = array( 
             'QueueUrl' => $queue_url,
             'ReceiptHandle' => $message_handle,
-            'VisibilityTimeout' => 30
+            'VisibilityTimeout' => $visibility_timeout
         );
         
         // purge the queue

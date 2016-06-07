@@ -229,9 +229,9 @@ input {
                     msg_handle = value['ReceiptHandle'];
                     msg_md5 = value['MD5OfBody'];
                     msg_body = value['Body'];
-                    if ( ! $('#' + msg_handle).length ) {
+                    if ( ! $('#' + msg_id).length ) {
                         $('#message_list').prepend(
-                            $('<li>').attr('class', 'new_message').attr('id', msg_handle)
+                            $('<li>').attr('class', 'new_message').attr('id', msg_id)
                             .append(
                                 $('<span>').attr('class','message_source').text(queue_name)
                             ).append(
@@ -241,21 +241,25 @@ input {
                             ).append(
                                 $('<br>')
                             ).append(
-                                $('<strong>').text(msg_id)
-                            ).append(
-                                $('<br>')
-                            ).append(
                                 $('<span>').attr('class','message_body').text(msg_body)
                             ).append(
                                 $('<br>')
                             ).append(
-                                $('<button>').attr('class', 'button delete').data('queue_name',queue_name).data('message_handle',msg_handle).append('delete').click(function(){do_delete_message($(this))})
+                                $('<button>').attr('class', 'button delete')
+                                    .data('queue_name',queue_name)
+                                    .data('message_handle',msg_handle)
+                                    .data('message_id',msg_id)
+                                    .append('delete').click(function(){do_delete_message($(this))})
                             ).append(
-                                $('<button>').attr('class', 'button purge').data('queue_name',queue_name).data('message_handle',msg_handle).append('change visibility timeout').click(function(){do_change_visibility_timeout($(this))})
+                                $('<button>').attr('class', 'button purge')
+                                .data('queue_name',queue_name)
+                                .data('message_handle',msg_handle)
+                                .data('message_id',msg_id)
+                                .append('change visibility timeout').click(function(){do_change_visibility_timeout($(this))})
                             )
                         );
                     } else {
-                        $('#' + msg_handle).addClass('new_message').parent().prepend($('#' + msg_handle));
+                        $('#' + msg_id).addClass('new_message').parent().prepend($('#' + msg_id));
                     }
                 });
                 $('#messages_received').text(count + ' received');
@@ -266,20 +270,22 @@ input {
     function do_delete_message(object) {
         // delete a message by ID
         msg_handle = object.data('message_handle');
+        msg_id = object.data('message_id');
         queue_name = object.data('queue_name');
         $.getJSON( "api_delete_message.php?queue_name=" + queue_name + "&message_handle=" + msg_handle, function(data) { 
             $('#message_list .new_message').removeClass('new_message');
-            $('#' + msg_handle).remove() 
+            $('#' + msg_id).remove() 
         });
     }
 
     function do_change_visibility_timeout(object) {
         // change a message timeout
         msg_handle = object.data('message_handle');
+        msg_id = object.data('message_id');
         queue_name = object.data('queue_name');
         $.getJSON( "api_visibility_timeout.php?queue_name=" + queue_name + "&message_handle=" + msg_handle, function(data) { 
             $('#message_list .new_message').removeClass('new_message');
-            $('#' + msg_handle).addClass('new_message').parent().prepend($('#' + msg_handle)) 
+            $('#' + msg_id).addClass('new_message').parent().prepend($('#' + msg_id)) 
         });
     }
 
